@@ -1,0 +1,45 @@
+# OpenSpec Configuration
+# This file configures OpenSpec artifact generation within DevLoop.
+# If OpenSpec CLI is available, `openspec init` generates this automatically.
+# If not, use this template manually.
+
+schema: spec-driven
+
+context: |
+  # Project context injected into all OpenSpec artifacts.
+  # Auto-populated by devloop-setup from detected tech stack.
+  #
+  # Tech stack: <!-- TypeScript / React / Node.js -->
+  # Package manager: <!-- pnpm -->
+  # Testing: <!-- Vitest for unit tests, Playwright for e2e -->
+  # API conventions: <!-- RESTful, JSON responses -->
+  # Code style: <!-- ESLint with Prettier, strict TypeScript -->
+
+rules:
+  proposal:
+    - "Clearly state the problem being solved and who is affected"
+    - "Define scope: what is in and what is out"
+    - "Identify risks and provide a rollback plan"
+    - "Reference relevant ADRs from devloop/decisions/"
+    - "Use domain language from devloop/context/CONTEXT.md"
+
+  specs:
+    - "Use Given/When/Then format for all scenarios"
+    - "Cover success paths, error paths, and edge cases"
+    - "Each requirement must be independently verifiable"
+    - "Use ADDED/MODIFIED/REMOVED/RENAMED for delta specs"
+    - "Reference existing specs when modifying behavior"
+
+  design:
+    - "Prefer reusing existing module boundaries"
+    - "Describe data and API compatibility impact"
+    - "Identify testing seams — prefer highest seam possible"
+    - "Document any new patterns or infrastructure"
+    - "Reference architecture-map.md for module context"
+
+  tasks:
+    - "Break into vertical slices, not horizontal layers"
+    - "Each task must be independently verifiable"
+    - "Order tasks by dependency — blockers first"
+    - "Size each task to fit in a single context window"
+    - "Use expand-contract pattern for wide refactors, not vertical slices"
