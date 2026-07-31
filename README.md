@@ -309,10 +309,27 @@ When you resume, DevLoop reads the state file and asks: **continue / start fresh
 A change is complete only when all three layers pass:
 
 ```text
-Code Layer     🧪 Tests pass + Typecheck pass + Lint pass + Build pass
-Spec Layer     📋 /opsx:verify: 0 criticals (warnings allowed)
-Delivery Layer 📦 Tasks complete + Code review clean + Delivery summary generated
+Code Layer     🧪 Tests + Typecheck + Lint + Build
+Spec Layer     📋 /opsx:verify: 0 criticals
+Delivery Layer 📦 Tasks + Code review + Delivery summary
 ```
+
+### Testing Standards
+
+| Level | Coverage Requirement |
+|-------|---------------------|
+| **L1** | At least 1 regression test covering the bug scenario |
+| **L2** | All OpenSpec specs scenarios have corresponding tests |
+| **L3** | All scenarios + critical cross-module integration tests |
+
+**Critical domains** (security, data, payment, privacy) must have dedicated test coverage regardless of risk level.
+
+**Key rules:**
+- Tests follow project conventions: existing test directory and `*.test.ts` naming.
+- Tests verify external observable behavior, not internal implementation details.
+- No test assertions may be modified to pass without verifying root cause.
+- Tests are submitted in the same OpenSpec change as the implementation code.
+- Test failure is a hard gate — cannot be skipped or bypassed for archiving.
 
 ---
 

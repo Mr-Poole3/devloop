@@ -21,6 +21,20 @@ All must pass. No exceptions.
 - [ ] New tests added for new behavior
 - [ ] Edge cases from specs are covered by tests
 - [ ] No tests were disabled or deleted to make things pass
+- [ ] Tests follow the project's existing test location and naming conventions
+
+### Test Coverage by Risk Level
+
+- [ ] **L1**: At least 1 regression test covering the fixed bug scenario
+- [ ] **L2**: All OpenSpec specs scenarios have corresponding test coverage
+- [ ] **L3**: All scenarios + critical cross-module integration tests
+- [ ] **Critical domains** (security, data, payment, privacy) have dedicated test coverage
+
+### Test Quality Rules
+
+- [ ] Tests verify external observable behavior, not internal implementation details
+- [ ] No test assertions were modified to pass without verifying root cause (unless the test itself was buggy)
+- [ ] Tests are submitted in the same OpenSpec change as the implementation code
 
 ### Typecheck
 

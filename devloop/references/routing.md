@@ -60,6 +60,10 @@ Direct handling — no state file, no OpenSpec, no grilling.
 1. Brief start confirmation (what will be changed)
 2. Complete (code-review result)
 
+**Test coverage:**
+- At least 1 regression test covering the fixed bug scenario.
+- If the fix touches security, data, payment, or privacy domains, dedicated tests required.
+
 **OpenSpec:** Not required. If the fix reveals a missing spec, note in delivery summary.
 
 ---
@@ -88,6 +92,11 @@ Direct handling — no state file, no OpenSpec, no grilling.
 9. archiving [CONFIRM: final_archive] → /opsx:sync → /opsx:archive
 10. done
 ```
+
+**Test coverage:**
+- All OpenSpec specs scenarios must have corresponding test coverage.
+- Security, data, payment, and privacy domains must have dedicated tests.
+- Tests verify external behavior, not internal implementation details.
 
 **Confirmation points:**
 1. Requirement understanding
@@ -140,6 +149,12 @@ Direct handling — no state file, no OpenSpec, no grilling.
 2. Plan and spec
 3. Start coding (explicit pause before first code modification)
 4. Final archive
+
+**Test coverage:**
+- All OpenSpec specs scenarios must have corresponding test coverage.
+- Critical cross-module paths must have integration tests.
+- Security, data, payment, and privacy domains must have dedicated tests.
+- Tests verify external behavior, not internal implementation details.
 
 **Additional:**
 - `to-tickets` is used when the change can be decomposed into multiple independently deliverable units.

@@ -186,18 +186,30 @@ Full state machine for the DevLoop workflow.
 **Actions:**
 1. **[L3 ONLY — CONFIRMATION POINT: start_coding]**
 2. Read `tasks.md` from current OpenSpec change.
-3. For each task:
-   a. Use `tdd` skill: write failing test → implement → green → refactor.
-   b. After completing each task, check it off in `tasks.md`.
-   c. Update `.state.yaml` with current task.
+3. For each task, follow the TDD loop:
+   a. **Red**: Write a failing test that covers the expected behavior.
+      - Test file location: follow project convention (`tests/` or `src/__tests__/`).
+      - Test file naming: `*.test.ts` (or language-appropriate suffix).
+      - Test only external observable behavior, not internal implementation.
+      - If the task touches security, data, payment, or privacy domains, write dedicated tests.
+   b. **Green**: Implement the minimum code to make the test pass.
+   c. **Refactor**: Clean up code while keeping tests green.
+   d. After completing each task, check it off in `tasks.md`.
+   e. Update `.state.yaml` with current task.
 4. **Spec-first principle:** If implementation reveals a spec gap:
    - Pause coding.
    - Update OpenSpec (`/opsx:update` or manual edit of specs/design/tasks).
    - Resume coding.
-5. If test fails, enter `diagnosing-bugs` flow.
+5. If test fails, enter `diagnosing-bugs` flow — do not blindly retry.
 6. Track consecutive failures. If 3 in a row, pause and report.
 
 **Exit:** All tasks in `tasks.md` completed.
+
+**Test coverage by risk level:**
+- **L1**: At least 1 regression test covering the bug scenario.
+- **L2**: All OpenSpec specs scenarios have corresponding test coverage.
+- **L3**: All scenarios + critical cross-module integration tests.
+- **Critical domains** (security, data, payment, privacy): must have dedicated test coverage.
 
 **State file:** Update `stage: verifying`.
 
@@ -208,13 +220,26 @@ Full state machine for the DevLoop workflow.
 **Entry:** All tasks completed.
 
 **Actions:**
-1. Run test command from `config.yaml`.
-2. Run typecheck command.
-3. Run lint command.
-4. Execute `/opsx:verify` — checks completeness, correctness, coherence.
-5. Execute `code-review` skill — checks standards and spec compliance.
+1. **Run full test suite** — `<test command from config.yaml>`
+   - If tests fail → enter `diagnosing-bugs` flow.
+   - Never modify test assertions to make them pass without verifying root cause.
+   - Never disable or skip tests.
+2. **Run typecheck** — `<typecheck command from config.yaml>`
+3. **Run lint** — `<lint command from config.yaml>`
+4. **Verify test coverage by risk level**:
+   - Check L1: at least 1 regression test for the bug scenario.
+   - Check L2/L3: every OpenSpec spec scenario has a corresponding test.
+   - Check critical domains (security, data, payment, privacy): dedicated tests exist.
+5. **Execute `/opsx:verify`** — checks completeness, correctness, coherence.
+6. **Execute `code-review` skill** — checks standards and spec compliance.
    - If host supports sub-agents: run both axes in parallel.
    - If not: run serially.
+
+**Failure handling:**
+- Test failure → `diagnosing-bugs` → fix → re-run tests.
+- 3 consecutive test failures → **force pause**, output diagnostic report.
+- If tests pass but `/opsx:verify` fails → fix spec gaps first.
+- Tests cannot be skipped or bypassed — testing is a hard gate for archiving.
 
 **Exit:** All checks pass (warnings allowed, criticals must be resolved).
 
