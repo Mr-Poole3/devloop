@@ -101,7 +101,24 @@ DevLoop:
 
 ### 1. DevLoop skill をインストール
 
-`devloop/` と `devloop-setup/` skill ディレクトリをエージェントの skill ロードパスにコピーするか、エージェントの skill インストール機能を使用してください。
+**オプション A — `npx skills` でインストール（推奨）**
+
+```bash
+npx skills@latest add Mr-Poole3/devloop
+```
+
+CLI が `devloop-setup` と `devloop` の両方の skill を自動検出し、どのエージェントにインストールするか選択できます（Claude Code、Codex、OpenCode、TRAE、Cursor など 50+ 対応）。
+
+個別の skill をインストールすることも可能：
+
+```bash
+npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/devloop
+```
+
+**オプション B — 手動インストール**
+
+`devloop/` と `devloop-setup/` skill ディレクトリをエージェントの skill ロードパスにコピーしてください。
 
 ### 2. プロジェクトでセットアップを実行
 

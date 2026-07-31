@@ -101,7 +101,24 @@ DevLoop:
 
 ### 1. 安装 DevLoop skills
 
-将 `devloop/` 和 `devloop-setup/` skill 目录复制到你的 Agent skill 加载路径中，或使用 Agent 的 skill 安装机制。
+**方式 A — 通过 `npx skills` 安装（推荐）**
+
+```bash
+npx skills@latest add Mr-Poole3/devloop
+```
+
+CLI 会自动检测 `devloop-setup` 和 `devloop` 两个 skill，让你选择安装到哪些 Agent（Claude Code、Codex、OpenCode、TRAE、Cursor 等 50+ 宿主）。
+
+也可以单独安装某个 skill：
+
+```bash
+npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/devloop
+```
+
+**方式 B — 手动安装**
+
+将 `devloop/` 和 `devloop-setup/` skill 目录复制到你的 Agent skill 加载路径中。
 
 ### 2. 在项目中运行初始化
 

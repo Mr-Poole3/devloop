@@ -101,7 +101,24 @@ Drive a requirement through the full development loop.
 
 ### 1. Install DevLoop skills
 
-Copy the `devloop/` and `devloop-setup/` skill directories into your agent's skill loading path, or use your agent's skill installation mechanism.
+**Option A — Install via `npx skills` (recommended)**
+
+```bash
+npx skills@latest add Mr-Poole3/devloop
+```
+
+The CLI will detect both `devloop-setup` and `devloop` skills and let you choose which agents to install them on (Claude Code, Codex, OpenCode, TRAE, Cursor, and 50+ more).
+
+You can also install a specific skill:
+
+```bash
+npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/devloop
+```
+
+**Option B — Manual install**
+
+Copy the `devloop/` and `devloop-setup/` skill directories into your agent's skill loading path.
 
 ### 2. Run setup in your project
 
