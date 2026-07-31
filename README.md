@@ -1,29 +1,31 @@
-# DevLoop
+# 🔄 DevLoop
 
 > One requirement in. A verified, spec-driven, archived change out.
 
-DevLoop is an integrated AI development workflow that combines [requirement grilling](https://github.com/mattpocock/skills), [OpenSpec](https://github.com/Fission-AI/OpenSpec) spec-driven changes, TDD, code review, and archival into a **single automated loop**.
+**[English](README.md)** | [中文](README.zh-CN.md) | [日本語](README.ja.md)
+
+DevLoop is an integrated AI development workflow that combines [requirement grilling](https://github.com/mattpocock/skills), [OpenSpec](https://github.com/Fission-AI/OpenSpec) spec-driven changes, TDD, code review, and archival into a **single automated loop** 🚀
 
 Instead of manually orchestrating multiple tools across the development lifecycle, you provide one requirement and DevLoop drives the entire process — clarifying, exploring, specifying, implementing, testing, verifying, and archiving.
 
 ---
 
-## Why DevLoop?
+## 🤔 Why DevLoop?
 
 AI coding agents are powerful but unpredictable. Common failure modes:
 
 | Failure | Cause | DevLoop's Fix |
 |---------|-------|---------------|
-| Agent builds the wrong thing | Misaligned understanding | Grilling session before any code |
-| Agent produces a ball of mud | No architecture discipline | Spec-first principle + module spec tracking |
-| No one knows what was decided | Decisions live in chat history | OpenSpec artifacts as persistent truth |
-| Specs drift from code | No verification step | Three-layer verification before archive |
-| Small fixes get over-documented | One-size-fits-all process | Risk-based routing (L0–L3) |
-| Work lost on interruption | Session-only state | `.state.yaml` for cross-session recovery |
+| Agent builds the wrong thing | Misaligned understanding | 🔍 Grilling session before any code |
+| Agent produces a ball of mud | No architecture discipline | 📐 Spec-first principle + module spec tracking |
+| No one knows what was decided | Decisions live in chat history | 📄 OpenSpec artifacts as persistent truth |
+| Specs drift from code | No verification step | ✅ Three-layer verification before archive |
+| Small fixes get over-documented | One-size-fits-all process | ⚖️ Risk-based routing (L0–L3) |
+| Work lost on interruption | Session-only state | 💾 `.state.yaml` for cross-session recovery |
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
 ```text
 User: /develop I want to add dark mode support
@@ -34,23 +36,23 @@ DevLoop:
   3. Explores affected modules, builds missing specs
   4. Grills the user to clarify every decision branch
   5. Creates OpenSpec change (proposal + specs + design + tasks)
-  ── [PAUSE] User confirms requirement understanding ──
-  ── [PAUSE] User confirms plan and spec ──
+  ── ⏸️ User confirms requirement understanding ──
+  ── ⏸️ User confirms plan and spec ──
   6. Implements with TDD (red-green-refactor)
   7. Any spec gap? → Updates OpenSpec first, then code
   8. Runs tests, typecheck, lint
   9. Executes /opsx:verify (spec completeness, correctness, coherence)
  10. Executes code-review (standards + spec compliance)
-  ── [PAUSE] User confirms archive ──
+  ── ⏸️ User confirms archive ──
  11. Syncs specs to formal registry
  12. Archives change
  13. Updates module index and architecture map
- 14. Outputs delivery report
+ 14. Outputs delivery report 📦
 ```
 
 ---
 
-## Two Skills
+## 🛠️ Two Skills
 
 ### `devloop-setup` — Initialize
 
@@ -64,12 +66,12 @@ Set up, check, and repair the DevLoop workflow in any repository.
 ```
 
 **What it does:**
-- Auto-detects tech stack (language, framework, package manager, test/lint/build commands)
-- Scans source directories and builds an L0 architecture map
-- Creates the `devloop/` directory structure
-- Initializes OpenSpec configuration
-- Generates config files with detected values
-- Idempotent — safe to run multiple times
+- 🔎 Auto-detects tech stack (language, framework, package manager, test/lint/build commands)
+- 🗺️ Scans source directories and builds an L0 architecture map
+- 📁 Creates the `devloop/` directory structure
+- ⚙️ Initializes OpenSpec configuration
+- 📝 Generates config files with detected values
+- 🔁 Idempotent — safe to run multiple times
 
 ### `devloop` — Develop
 
@@ -83,19 +85,19 @@ Drive a requirement through the full development loop.
 ```
 
 **What it does:**
-- Reads `.state.yaml` to resume interrupted work
-- Classifies risk level (L0–L3) based on escalation factors
-- Grills the user to resolve every decision branch
-- Creates OpenSpec change artifacts (proposal, specs, design, tasks)
-- Implements with TDD
-- Verifies against specs
-- Reviews code quality
-- Archives and syncs formal specs
-- Outputs delivery report
+- 💾 Reads `.state.yaml` to resume interrupted work
+- ⚖️ Classifies risk level (L0–L3) based on escalation factors
+- 🔥 Grills the user to resolve every decision branch
+- 📄 Creates OpenSpec change artifacts (proposal, specs, design, tasks)
+- 🧪 Implements with TDD
+- ✅ Verifies against specs
+- 👁️ Reviews code quality
+- 📦 Archives and syncs formal specs
+- 📊 Outputs delivery report
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Install DevLoop skills
 
@@ -115,11 +117,11 @@ This creates the `devloop/` directory, detects your tech stack, and generates al
 /develop <your requirement>
 ```
 
-That's it. DevLoop handles the rest.
+That's it. DevLoop handles the rest. 🎉
 
 ---
 
-## Risk Levels
+## ⚖️ Risk Levels
 
 DevLoop automatically classifies each requirement by risk level and selects the appropriate workflow weight.
 
@@ -130,7 +132,7 @@ DevLoop automatically classifies each requirement by risk level and selects the 
 | **L2** | Medium feature or refactor | `grill → OpenSpec → apply → verify → archive` | Requirement, Plan, Archive |
 | **L3** | Cross-module, high-risk, architectural | `grill-with-docs → explore → spec/tickets → OpenSpec → apply → verify → review → archive` | Requirement, Plan, Start coding, Archive |
 
-**Escalation factors** (any of these forces at least L2):
+**🚨 Escalation factors** (any of these forces at least L2):
 
 - Data model changes
 - Public API changes
@@ -144,7 +146,7 @@ DevLoop automatically classifies each requirement by risk level and selects the 
 
 ---
 
-## Directory Structure
+## 📁 Directory Structure
 
 After `devloop-setup init`, your project gets a single `devloop/` directory:
 
@@ -179,7 +181,7 @@ your-project/
 
 ---
 
-## Lifecycle
+## 🔄 Lifecycle
 
 DevLoop follows a 10-stage state machine. Stages are not locked phases — they're actions that can be revisited.
 
@@ -189,11 +191,11 @@ triaging        Classify risk level (L0-L3)
 exploring       Read architecture map, build missing module specs (L1 on-demand)
 grilling        Clarify requirements (grill-me for L2, grill-with-docs for L3)
 specifying      Create OpenSpec change (proposal, specs, design, tasks)
-reviewing_plan  [CONFIRM] Present requirement + plan summary
-implementing    [CONFIRM L3] Execute tasks with TDD, spec-first
+reviewing_plan  ⏸️ [CONFIRM] Present requirement + plan summary
+implementing    ⏸️ [CONFIRM L3] Execute tasks with TDD, spec-first
 verifying       Run tests, /opsx:verify, code-review
-archiving       [CONFIRM] Sync specs, archive change, update module index
-done            Output delivery report
+archiving       ⏸️ [CONFIRM] Sync specs, archive change, update module index
+done            Output delivery report 📦
 ```
 
 **Backward transitions are allowed:**
@@ -204,7 +206,7 @@ done            Output delivery report
 
 ---
 
-## Confirmation Points
+## ⏸️ Confirmation Points
 
 Even in high-automation mode, DevLoop pauses at key points to prevent catastrophic mistakes.
 
@@ -217,7 +219,7 @@ Even in high-automation mode, DevLoop pauses at key points to prevent catastroph
 
 ---
 
-## Spec-First Principle
+## 📐 Spec-First Principle
 
 ```text
 Does this change affect external behavior or architecture?
@@ -229,7 +231,7 @@ This prevents spec drift — the scenario where code and specs diverge over time
 
 ---
 
-## Brownfield Strategy: Structured Index + On-Demand Modeling
+## 🏗️ Brownfield Strategy: Structured Index + On-Demand Modeling
 
 DevLoop doesn't require a greenfield project. For existing codebases, it uses a three-layer approach:
 
@@ -248,11 +250,11 @@ L2 — Continuous Maintenance (on archive)
      Module index and architecture map are updated if structure changed.
 ```
 
-This means your spec coverage grows naturally with actual development activity — no wasted upfront documentation.
+This means your spec coverage grows naturally with actual development activity — no wasted upfront documentation. 🌱
 
 ---
 
-## State Recovery
+## 💾 State Recovery
 
 DevLoop maintains `devloop/.state.yaml` (gitignored) for cross-session recovery:
 
@@ -274,7 +276,7 @@ When you resume, DevLoop reads the state file and asks: **continue / start fresh
 
 ---
 
-## Failure Recovery
+## 🛡️ Failure Recovery
 
 | Error Type | Recovery Strategy |
 |---|---|
@@ -283,25 +285,25 @@ When you resume, DevLoop reads the state file and asks: **continue / start fresh
 | OpenSpec CLI failure | Fix config or artifact format, retry; never bypass CLI |
 | `/opsx:verify` inconsistency | Classify each issue, fix code or spec, re-verify |
 | Codebase structure mismatch | Return to `exploring`, re-investigate |
-| **3 consecutive failures** | **Force pause** — output diagnostic report, request user intervention |
+| **3 consecutive failures** | **🚨 Force pause** — output diagnostic report, request user intervention |
 | User interrupt | Save state, output handoff summary |
 | Missing dependency | Pause and report, do not attempt alternatives |
 
 ---
 
-## Three-Layer Completion Standard
+## ✅ Three-Layer Completion Standard
 
 A change is complete only when all three layers pass:
 
 ```text
-Code Layer     Tests pass + Typecheck pass + Lint pass + Build pass
-Spec Layer     /opsx:verify: 0 criticals (warnings allowed)
-Delivery Layer Tasks complete + Code review clean + Delivery summary generated
+Code Layer     🧪 Tests pass + Typecheck pass + Lint pass + Build pass
+Spec Layer     📋 /opsx:verify: 0 criticals (warnings allowed)
+Delivery Layer 📦 Tasks complete + Code review clean + Delivery summary generated
 ```
 
 ---
 
-## Host Compatibility
+## 🖥️ Host Compatibility
 
 DevLoop is designed to work across AI coding agents without depending on host-specific features.
 
@@ -320,7 +322,7 @@ DevLoop is designed to work across AI coding agents without depending on host-sp
 
 ---
 
-## Skill File Structure
+## 📂 Skill File Structure
 
 ```text
 devloop-setup/
@@ -355,7 +357,7 @@ devloop/
 
 ---
 
-## Dependencies
+## 📦 Dependencies
 
 | Dependency | Required For | Install |
 |------------|-------------|---------|
@@ -366,7 +368,7 @@ DevLoop works without these for L0/L1 tasks. L2/L3 will pause and report missing
 
 ---
 
-## Key Principles
+## 💡 Key Principles
 
 1. **Single entry point** — User only provides a requirement. No manual orchestration.
 2. **Understand before executing** — Grilling happens before any code is written.
@@ -378,7 +380,7 @@ DevLoop works without these for L0/L1 tasks. L2/L3 will pause and report missing
 
 ---
 
-## Authority Hierarchy
+## 🏛️ Authority Hierarchy
 
 ```text
 CONTEXT.md / ADR              → Long-term project facts and domain language
@@ -392,7 +394,7 @@ When documents conflict: **current OpenSpec change wins**, but conflicts must be
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome. For significant changes, please follow the DevLoop workflow itself:
 
@@ -403,6 +405,6 @@ Contributions are welcome. For significant changes, please follow the DevLoop wo
 
 ---
 
-## License
+## 📄 License
 
 [MIT](LICENSE)
