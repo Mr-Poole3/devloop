@@ -49,11 +49,11 @@ Direct handling — no state file, no OpenSpec, no grilling.
 
 **Workflow:**
 ```text
-1. Create .state.yaml (stage: implementing)
+1. Create state file devloop/.state/<change-id>.yaml (stage: implementing)
 2. diagnosing-bugs (if bug fix) or direct implementation (if small feature)
 3. tdd (red-green-refactor)
 4. code-review
-5. Clear .state.yaml
+5. Set stage: done in state file
 ```
 
 **Confirmation points:**
@@ -184,10 +184,27 @@ Record the forfeiture in the delivery summary under "Spec-first deviations".
 - Security, data, payment, and privacy domains must have dedicated tests.
 - Tests verify external behavior, not internal implementation details.
 
-**Additional:**
-- `to-tickets` is used when the change can be decomposed into multiple independently deliverable units.
-- Each ticket may map to its own OpenSpec change.
-- `to-spec` is used when a standalone PRD is needed for stakeholder communication.
+**Additional — `to-tickets` and `to-spec` explicit triggers:**
+
+`to-tickets` (decompose into independent deliverable tickets) — use when ANY is true:
+- OpenSpec `tasks.md` would exceed **15 tasks** (signal: scope too large for one PR/review).
+- The change spans **≥3 modules** with independent value (each module's slice is shippable alone).
+- The change has **≥2 independent deliverable units** (e.g., backend API + frontend UI can ship separately).
+- **Multi-person or multi-agent collaboration** is required (different owners for different slices).
+- The change will be delivered across **>1 sprint/iteration**.
+
+Each ticket becomes its own OpenSpec change with its own state file under `devloop/.state/`. Tickets are tracked in `devloop/tickets/`.
+
+`to-spec` (standalone PRD before OpenSpec) — use when ANY is true:
+- **Stakeholder sign-off needed** beyond the dev team (PM, design, legal, compliance, leadership).
+- The change requires **budget or timeline approval** (cost >1 sprint, infra spend, vendor contract).
+- **Regulatory/compliance documentation** is required (GDPR, HIPAA, SOX, PCI-DSS audit trail).
+- The change is **strategic/bet-the-company** (new market, new business model, replaces core system).
+- The change affects **external partners or public commitments** (API consumers, SLA changes, public roadmap).
+
+`to-spec` produces a PRD in `devloop/tickets/` or `devloop/research/` BEFORE `/opsx:propose`. The PRD is the input to grilling, not a replacement for it.
+
+**Neither is ever auto-applied.** Both require the trigger condition to be met AND reported to the user at the `reviewing_plan` confirmation point. If neither trigger is met, skip both and proceed directly to `/opsx:propose`.
 
 ## Edge Cases
 

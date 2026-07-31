@@ -24,7 +24,7 @@ What repair mode can and cannot do.
 - Always confirm before overwriting.
 
 ### Missing .gitignore Entry
-- Add `devloop/.state.yaml` to `.gitignore` if missing.
+- Add `devloop/.state/` and legacy `devloop/.state.yaml` to `.gitignore` if missing.
 - Do not modify other `.gitignore` entries.
 
 ### Missing OpenSpec Structure

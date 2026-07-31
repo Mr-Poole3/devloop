@@ -21,7 +21,7 @@ AI 编码 Agent 很强大，但也容易失控。常见问题：
 | 没人知道做了什么决策 | 决策留在聊天记录里 | 📄 OpenSpec 工件作为持久事实 |
 | 规格与代码脱节 | 没有验证步骤 | ✅ 归档前三层验证 |
 | 小修复被过度文档化 | 一刀切流程 | ⚖️ 风险分级路由（L0-L3） |
-| 中断后工作丢失 | 仅依赖会话状态 | 💾 `.state.yaml` 跨会话恢复 |
+| 中断后工作丢失 | 仅依赖会话状态 | 💾 每变更独立状态文件（`devloop/.state/`）跨会话恢复 |
 
 ---
 
@@ -85,7 +85,7 @@ DevLoop:
 ```
 
 **功能：**
-- 💾 读取 `.state.yaml` 恢复中断的工作
+- 💾 读取 `devloop/.state/` 下的变更状态文件恢复中断的工作
 - ⚖️ 根据升级因素进行风险分级（L0-L3）
 - 🔥 追问用户，解决每个决策分支
 - 📄 创建 OpenSpec 变更工件（proposal、specs、design、tasks）
@@ -167,7 +167,8 @@ DevLoop 自动对每个需求进行风险分级，并选择相应重量的工作
 your-project/
 ├── devloop/                        # 所有 DevLoop 产物都在这里
 │   ├── config.yaml                 # DevLoop 总控配置
-│   ├── .state.yaml                 # 运行状态（已 gitignore）
+│   ├── .state/                     # 每个变更独立的运行状态（已 gitignore，支持并行多变更）
+│   │   └── <change-id>.yaml        # 单个进行中变更的状态文件（schema_version: 1）
 │   ├── context/                    # 项目上下文和架构地图
 │   │   ├── architecture-map.md     # L0 模块索引（快速结构扫描）
 │   │   ├── tech-stack.md           # 检测到的语言、框架、命令
@@ -204,10 +205,10 @@ triaging        风险分级（L0-L3）
 exploring       读取架构地图，构建缺失的模块规格（L1 按需）
 grilling        澄清需求（L2 用 grill-me，L3 用 grill-with-docs）
 specifying      创建 OpenSpec 变更（proposal、specs、design、tasks）
-reviewing_plan  ⏸️ [确认] 展示需求 + 方案摘要
-implementing    ⏸️ [L3 确认] 使用 TDD 执行任务，规格先行
+reviewing_plan  ⏸️ [确认] 展示需求 + 方案摘要（L2 快速通道合并为 combined_plan）
+implementing    ⏸️ [L3/hotfix 确认] 使用 TDD 执行任务，规格先行
 verifying       运行测试、/opsx:verify、代码审查
-archiving       ⏸️ [确认] 同步规格、归档变更、更新模块索引
+archiving       ⏸️ [确认] 同步规格、归档变更、更新模块索引（hotfix 需回溯规格）
 done            输出交付报告 📦
 ```
 
@@ -227,7 +228,8 @@ done            输出交付报告 📦
 |--------|------|---------|
 | **需求理解** | 追问后，创建规格前 | 目标、用户、范围、成功标准、决策、不确定项 |
 | **方案和规格** | OpenSpec 工件生成后，编码前 | Proposal、specs、design、tasks、测试策略、风险、回滚 |
-| **开始编码**（仅 L3） | 首次修改代码前 | 要修改的文件、新增文件、测试文件 |
+| **合并方案**（L2 快速通道） | 同时确认需求和计划 | 需求摘要与计划摘要合并展示 |
+| **开始编码**（L3 或 hotfix） | 首次修改代码前 | 要修改的文件、新增文件、测试文件 |
 | **最终归档** | 验证后，归档前 | 交付总结、测试结果、验证结果、警告 |
 
 ---
@@ -269,12 +271,16 @@ L2 — 持续维护（归档时）
 
 ## 💾 状态恢复
 
-DevLoop 维护 `devloop/.state.yaml`（已 gitignore）用于跨会话恢复：
+DevLoop 为每个变更维护独立状态文件 `devloop/.state/<change-id>.yaml`（已 gitignore），用于跨会话恢复。旧版 `devloop/.state.yaml` 在首次读取时自动迁移。
 
 ```yaml
-current_change: add-dark-mode
+# devloop/.state/<change-id>.yaml
+schema_version: 1
+change_id: add-dark-mode
 stage: implementing
 risk_level: L2
+fast_track: false
+hotfix: false
 confirmed: [requirement_understanding, plan_and_spec]
 pending_confirmation: []
 tasks:
@@ -282,10 +288,16 @@ tasks:
   completed: 7
   current: "2.3 Update theme toggle component"
 consecutive_failures: 0
+metrics:
+  stage_durations: { intake: 2s, triaging: 5s, grilling: 120s }
+  failure_counts: { test: 1, typecheck: 0, lint: 0, verify: 0 }
+  confirmation_rejections: 0
+  spec_drifts: 0
+created_at: "2026-08-01T10:00:00Z"
 last_updated: "2026-08-01T10:30:00Z"
 ```
 
-恢复时，DevLoop 读取状态文件并询问：**继续 / 重新开始 / 放弃？**
+恢复时，DevLoop 读取进行中的状态文件并询问：**继续 / 新建并行变更 / 放弃？**
 
 ---
 

@@ -21,7 +21,7 @@ AI coding agents are powerful but unpredictable. Common failure modes:
 | No one knows what was decided | Decisions live in chat history | 📄 OpenSpec artifacts as persistent truth |
 | Specs drift from code | No verification step | ✅ Three-layer verification before archive |
 | Small fixes get over-documented | One-size-fits-all process | ⚖️ Risk-based routing (L0–L3) |
-| Work lost on interruption | Session-only state | 💾 `.state.yaml` for cross-session recovery |
+| Work lost on interruption | Session-only state | 💾 Per-change state files (`devloop/.state/`) for cross-session recovery |
 
 ---
 
@@ -85,7 +85,7 @@ Drive a requirement through the full development loop.
 ```
 
 **What it does:**
-- 💾 Reads `.state.yaml` to resume interrupted work
+- 💾 Reads per-change state files under `devloop/.state/` to resume interrupted work
 - ⚖️ Classifies risk level (L0–L3) based on escalation factors
 - 🔥 Grills the user to resolve every decision branch
 - 📄 Creates OpenSpec change artifacts (proposal, specs, design, tasks)
@@ -167,7 +167,8 @@ After `devloop-setup init`, your project gets a single `devloop/` directory:
 your-project/
 ├── devloop/                        # All DevLoop artifacts live here
 │   ├── config.yaml                 # DevLoop total control config
-│   ├── .state.yaml                 # Runtime state (gitignored)
+│   ├── .state/                     # Per-change runtime state (gitignored, multi-change parallel)
+│   │   └── <change-id>.yaml        # One file per in-progress change (schema_version: 1)
 │   ├── context/                    # Project context and architecture map
 │   │   ├── architecture-map.md     # L0 module index (fast structural scan)
 │   │   ├── tech-stack.md           # Detected language, framework, commands
@@ -204,10 +205,10 @@ triaging        Classify risk level (L0-L3)
 exploring       Read architecture map, build missing module specs (L1 on-demand)
 grilling        Clarify requirements (grill-me for L2, grill-with-docs for L3)
 specifying      Create OpenSpec change (proposal, specs, design, tasks)
-reviewing_plan  ⏸️ [CONFIRM] Present requirement + plan summary
-implementing    ⏸️ [CONFIRM L3] Execute tasks with TDD, spec-first
+reviewing_plan  ⏸️ [CONFIRM] Present requirement + plan summary (or merged combined_plan for L2 fast track)
+implementing    ⏸️ [CONFIRM L3/hotfix] Execute tasks with TDD, spec-first
 verifying       Run tests, /opsx:verify, code-review
-archiving       ⏸️ [CONFIRM] Sync specs, archive change, update module index
+archiving       ⏸️ [CONFIRM] Sync specs, archive change, update module index (retroactive spec required for hotfix)
 done            Output delivery report 📦
 ```
 
@@ -227,7 +228,8 @@ Even in high-automation mode, DevLoop pauses at key points to prevent catastroph
 |-------|------|------------------|
 | **Requirement understanding** | After grilling, before specs | Goal, users, scope, success criteria, decisions, uncertainties |
 | **Plan and spec** | After OpenSpec artifacts, before code | Proposal, specs, design, tasks, testing strategy, risks, rollback |
-| **Start coding** (L3 only) | Before first code modification | Files to change, new files, test files |
+| **Combined plan** (L2 fast track) | Merged requirement + plan in one pause | Single-block summary of requirement and plan |
+| **Start coding** (L3 or hotfix) | Before first code modification | Files to change, new files, test files |
 | **Final archive** | After verification, before archive | Delivery summary, test results, verify results, warnings |
 
 ---
@@ -269,12 +271,16 @@ This means your spec coverage grows naturally with actual development activity �
 
 ## 💾 State Recovery
 
-DevLoop maintains `devloop/.state.yaml` (gitignored) for cross-session recovery:
+DevLoop maintains per-change state files under `devloop/.state/<change-id>.yaml` (gitignored) for cross-session recovery. Legacy `devloop/.state.yaml` is migrated automatically on first read.
 
 ```yaml
-current_change: add-dark-mode
+# devloop/.state/<change-id>.yaml
+schema_version: 1
+change_id: add-dark-mode
 stage: implementing
 risk_level: L2
+fast_track: false
+hotfix: false
 confirmed: [requirement_understanding, plan_and_spec]
 pending_confirmation: []
 tasks:
@@ -282,10 +288,16 @@ tasks:
   completed: 7
   current: "2.3 Update theme toggle component"
 consecutive_failures: 0
+metrics:
+  stage_durations: { intake: 2s, triaging: 5s, grilling: 120s }
+  failure_counts: { test: 1, typecheck: 0, lint: 0, verify: 0 }
+  confirmation_rejections: 0
+  spec_drifts: 0
+created_at: "2026-08-01T10:00:00Z"
 last_updated: "2026-08-01T10:30:00Z"
 ```
 
-When you resume, DevLoop reads the state file and asks: **continue / start fresh / abandon?**
+When you resume, DevLoop reads in-progress state files and asks: **continue / start new parallel / abandon?**
 
 ---
 

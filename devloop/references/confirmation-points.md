@@ -47,7 +47,7 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 **If rejected:** Return to grilling. Ask what was missed.
 
-**If approved:** Record in `.state.yaml`: `confirmed: [requirement_understanding]`.
+**If approved:** Record in the active change's state file: `confirmed: [requirement_understanding]`.
 
 ## Point 2: Plan and Spec
 
@@ -77,7 +77,7 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 **If rejected:** Update OpenSpec artifacts (`/opsx:update`). Re-present.
 
-**If approved:** Record in `.state.yaml`: `confirmed: [requirement_understanding, plan_and_spec]`.
+**If approved:** Record in the active change's state file: `confirmed: [requirement_understanding, plan_and_spec]`.
 
 ## Point 2.5: Combined Plan (L2 Fast Track Only)
 
@@ -109,7 +109,7 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 **If approved:** Record in the change's state file: `confirmed: [combined_plan]`. The `combined_plan` confirmation satisfies both `requirement_understanding` and `plan_and_spec` for downstream stages.
 
-## Point 3: Start Coding (L3 Only)
+## Point 3: Start Coding (L3 or Hotfix)
 
 **Stage:** Just before first code modification in implementing.
 
@@ -132,7 +132,7 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 **If rejected:** Return to reviewing_plan. Ask what needs to change.
 
-**If approved:** Record in `.state.yaml`: `confirmed: [..., start_coding]`.
+**If approved:** Record in the active change's state file: `confirmed: [..., start_coding]`.
 
 ## Point 4: Final Archive
 
@@ -161,7 +161,7 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 **If rejected:** Return to implementing or verifying. Ask what needs fixing.
 
-**If approved:** Execute `/opsx:sync`, `/opsx:archive`, clear `.state.yaml`.
+**If approved:** Execute `/opsx:sync`, `/opsx:archive`, set `stage: done` in the active change's state file.
 
 ## L1 Completion
 

@@ -42,15 +42,15 @@ intake → triaging → exploring → grilling → specifying
 4. **grilling** — L2: use `grilling` skill. L3: use `grill-with-docs` skill. Clarify until all decision branches resolved. Update `CONTEXT.md` and ADRs if L3.
 5. **specifying** — Create OpenSpec change. L2: `/opsx:propose`. L3: `/opsx:propose` or step-by-step. Generate proposal, specs, design, tasks.
 6. **reviewing_plan** — **[CONFIRMATION POINT]** Present requirement summary and plan. See [confirmation-points.md](references/confirmation-points.md).
-7. **implementing** — **[CONFIRMATION POINT for L3]** Execute tasks. Use `tdd` skill. Spec-first principle: any behavior change updates OpenSpec first. See [recovery.md](references/recovery.md).
+7. **implementing** — **[CONFIRMATION POINT for L3/hotfix]** Execute tasks. Use `tdd` skill. Spec-first principle: any behavior change updates OpenSpec first. See [recovery.md](references/recovery.md).
 8. **verifying** — Run tests, typecheck, lint. Execute `/opsx:verify`. Execute `code-review`. See [completion-checklist.md](references/completion-checklist.md).
-9. **archiving** — **[CONFIRMATION POINT]** Generate delivery summary. `/opsx:sync`. `/opsx:archive`. Update module index. Clear `.state.yaml`.
+9. **archiving** — **[CONFIRMATION POINT]** Generate delivery summary. `/opsx:sync`. `/opsx:archive`. Update module index. Clear the active change's state file (set `stage: done`). For hotfix changes, retroactive OpenSpec spec is required before archive.
 10. **done** — Output delivery report.
 
 ## L0 / L1 Shortcuts
 
 - **L0**: Handle directly. No state file, no OpenSpec.
-- **L1**: `diagnosing-bugs` → `tdd` → `code-review`. No OpenSpec required. Create a state file but skip OpenSpec stages.
+- **L1**: `diagnosing-bugs` → `tdd` → `code-review`. No OpenSpec required. Create a state file (`stage: implementing`) but skip OpenSpec stages.
 - **Hotfix**: Urgent production fixes. Skip grilling/specifying/reviewing_plan, go straight to implementing with TDD. **Retroactive OpenSpec spec is a hard gate for archiving.** Triggered by `/develop --hotfix` or urgency keywords. See [routing.md](references/routing.md#hotfix-bypass).
 
 ## Spec-First Principle

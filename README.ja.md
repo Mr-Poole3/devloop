@@ -21,7 +21,7 @@ AI コーディングエージェントは強力ですが、予測不能な面�
 | 決定事項が不明 | チャット履歴にだけ残る | 📄 OpenSpec アーティファクトを永続的な真実として保存 |
 | スペックとコードの乖離 | 検証ステップなし | ✅ アーカイブ前の三層検証 |
 | 小さな修正に過剰なドキュメント | 一律プロセス | ⚖️ リスクベースルーティング（L0-L3） |
-| 中断で作業ロスト | セッションのみの状態 | 💾 `.state.yaml` でセッション横断復旧 |
+| 中断で作業ロスト | セッションのみの状態 | 💾 変更ごとの状態ファイル（`devloop/.state/`）でセッション横断復旧 |
 
 ---
 
@@ -85,7 +85,7 @@ DevLoop:
 ```
 
 **機能：**
-- 💾 `.state.yaml` を読み込み、中断した作業を再開
+- 💾 `devloop/.state/` のチェンジごとの状態ファイルを読み込み、中断した作業を再開
 - ⚖️ エスカレーション要因に基づくリスク分類（L0-L3）
 - 🔥 ユーザーにヒアリングし、すべての決定分岐を解決
 - 📄 OpenSpec チェンジアーティファクトを作成（proposal、specs、design、tasks）
@@ -167,7 +167,8 @@ DevLoop は各要件をリスクレベルで自動分類し、適切なワーク
 your-project/
 ├── devloop/                        # DevLoop の全アーティファクトはここに
 │   ├── config.yaml                 # DevLoop 総合制御設定
-│   ├── .state.yaml                 # 実行状態（gitignore 対象）
+│   ├── .state/                     # 変更ごとの実行状態（gitignore 対象、並列複数変更対応）
+│   │   └── <change-id>.yaml        # 進行中の変更ごとの状態ファイル（schema_version: 1）
 │   ├── context/                    # プロジェクトコンテキストとアーキテクチャマップ
 │   │   ├── architecture-map.md     # L0 モジュールインデックス（高速構造スキャン）
 │   │   ├── tech-stack.md           # 検出された言語、フレームワーク、コマンド
@@ -204,10 +205,10 @@ triaging        リスクレベルを分類（L0-L3）
 exploring       アーキテクチャマップを読み込み、欠落モジュール仕様を構築（L1 オンデマンド）
 grilling        要件を明確化（L2 は grill-me、L3 は grill-with-docs）
 specifying      OpenSpec チェンジを作成（proposal、specs、design、tasks）
-reviewing_plan  ⏸️ [確認] 要件 + 計画サマリーを提示
-implementing    ⏸️ [L3 確認] TDD でタスクを実行、スペックファースト
+reviewing_plan  ⏸️ [確認] 要件 + 計画サマリーを提示（L2 ファストトラックは combined_plan に統合）
+implementing    ⏸️ [L3/hotfix 確認] TDD でタスクを実行、スペックファースト
 verifying       テスト、/opsx:verify、コードレビューを実行
-archiving       ⏸️ [確認] スペックを同期、チェンジをアーカイブ、モジュールインデックスを更新
+archiving       ⏸️ [確認] スペックを同期、チェンジをアーカイブ、モジュールインデックスを更新（hotfix は遡及スペック必須）
 done            デリバリーレポートを出力 📦
 ```
 
@@ -227,7 +228,8 @@ done            デリバリーレポートを出力 📦
 |---------|---------|---------|
 | **要件理解** | ヒアリング後、スペック作成前 | 目標、ユーザー、スコープ、成功基準、決定事項、不確実事項 |
 | **計画とスペック** | OpenSpec アーティファクト生成後、コーディング前 | Proposal、specs、design、tasks、テスト戦略、リスク、ロールバック |
-| **コーディング開始**（L3 のみ） | 最初のコード変更前 | 変更ファイル、新規ファイル、テストファイル |
+| **統合計画**（L2 ファストトラック） | 要件と計画を一括確認 | 要件サマリーと計画サマリーをまとめて提示 |
+| **コーディング開始**（L3 または hotfix） | 最初のコード変更前 | 変更ファイル、新規ファイル、テストファイル |
 | **最終アーカイブ** | 検証後、アーカイブ前 | デリバリーサマリー、テスト結果、検証結果、警告 |
 
 ---
@@ -269,12 +271,16 @@ L2 — 継続的メンテナンス（アーカイブ時）
 
 ## 💾 状態復旧
 
-DevLoop は `devloop/.state.yaml`（gitignore 対象）でセッション横断の復旧を管理します：
+DevLoop は変更ごとの状態ファイル `devloop/.state/<change-id>.yaml`（gitignore 対象）でセッション横断の復旧を管理します。レガシー `devloop/.state.yaml` は初回読み込み時に自動移行されます。
 
 ```yaml
-current_change: add-dark-mode
+# devloop/.state/<change-id>.yaml
+schema_version: 1
+change_id: add-dark-mode
 stage: implementing
 risk_level: L2
+fast_track: false
+hotfix: false
 confirmed: [requirement_understanding, plan_and_spec]
 pending_confirmation: []
 tasks:
@@ -282,10 +288,16 @@ tasks:
   completed: 7
   current: "2.3 Update theme toggle component"
 consecutive_failures: 0
+metrics:
+  stage_durations: { intake: 2s, triaging: 5s, grilling: 120s }
+  failure_counts: { test: 1, typecheck: 0, lint: 0, verify: 0 }
+  confirmation_rejections: 0
+  spec_drifts: 0
+created_at: "2026-08-01T10:00:00Z"
 last_updated: "2026-08-01T10:30:00Z"
 ```
 
-再開時、DevLoop は状態ファイルを読み込み、**継続 / 新規開始 / 破棄？** と尋ねます。
+再開時、DevLoop は進行中の状態ファイルを読み込み、**継続 / 並列で新規作成 / 破棄？** と尋ねます。
 
 ---
 

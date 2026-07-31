@@ -91,7 +91,7 @@ Full state machine for the DevLoop workflow.
 **Exit:** Risk level assigned. `stage` updated in the active change's state file.
 
 **L0 shortcut:** Handle directly, set `stage: done`, no further lifecycle stages.
-**L1 shortcut:** Skip to implementing-equivalent flow (diagnose → tdd → review).
+**L1 shortcut:** Create state file (stage: implementing) and skip to implementing-equivalent flow (diagnose → tdd → review).
 **L2/L3:** Continue to exploring.
 
 ---
@@ -157,8 +157,9 @@ Full state machine for the DevLoop workflow.
    - Does design reference existing module boundaries?
    - Are tasks vertical slices (not horizontal layers)?
 4. If artifacts are incomplete, use `/opsx:update` to refine.
-5. For L3 with multiple deliverable units: use `to-tickets` to break into independent tickets. Each ticket may get its own OpenSpec change.
-6. For L3 needing standalone PRD: use `to-spec` before OpenSpec.
+5. For L3: evaluate `to-tickets` and `to-spec` triggers (see [routing.md](routing.md#additional--to-tickets-and-to-spec-explicit-triggers)). Use them only when explicit trigger conditions are met, not by default.
+   - `to-tickets`: when change exceeds 15 tasks, spans ≥3 independent modules, or has ≥2 independent deliverable units. Each ticket becomes its own OpenSpec change with its own state file.
+   - `to-spec`: when stakeholder sign-off, budget approval, or compliance documentation is required. Produces a PRD before `/opsx:propose`.
 
 **Exit:** OpenSpec artifacts complete and internally consistent.
 
@@ -198,9 +199,10 @@ Full state machine for the DevLoop workflow.
 
 **Actions:**
 1. **[L3 ONLY — CONFIRMATION POINT: start_coding]**
-2. Read `tasks.md` from current OpenSpec change.
-3. **Run critical-domain detection** over the planned changed files and OpenSpec artifacts. See [completion-checklist.md](completion-checklist.md#critical-domain-detection-heuristics). Record detected domains in the change's state file. Each detected domain requires dedicated tests before its tasks can be marked complete.
-4. For each task, follow the TDD loop:
+2. **[Hotfix — BRIEF CONFIRMATION: “Fixing <symptom> by <approach>. OK?”]**
+3. Read `tasks.md` from current OpenSpec change.
+4. **Run critical-domain detection** over the planned changed files and OpenSpec artifacts. See [completion-checklist.md](completion-checklist.md#critical-domain-detection-heuristics). Record detected domains in the change's state file. Each detected domain requires dedicated tests before its tasks can be marked complete.
+5. For each task, follow the TDD loop:
    a. **Red**: Write a failing test that covers the expected behavior.
       - Test file location: follow project convention (`tests/` or `src/__tests__/`).
       - Test file naming: `*.test.ts` (or language-appropriate suffix).
@@ -210,12 +212,12 @@ Full state machine for the DevLoop workflow.
    c. **Refactor**: Clean up code while keeping tests green.
    d. After completing each task, check it off in `tasks.md`.
    e. Update the active change's state file with current task and `metrics.stage_durations`/`failure_counts` as events occur.
-5. **Spec-first principle:** If implementation reveals a spec gap:
+6. **Spec-first principle:** If implementation reveals a spec gap:
    - Pause coding.
    - Update OpenSpec (`/opsx:update` or manual edit of specs/design/tasks).
    - Resume coding.
-6. If test fails, enter `diagnosing-bugs` flow — do not blindly retry.
-7. Track consecutive failures. If 3 in a row, pause and report.
+7. If test fails, enter `diagnosing-bugs` flow — do not blindly retry.
+8. Track consecutive failures. If 3 in a row, pause and report.
 
 **Exit:** All tasks in `tasks.md` completed.
 

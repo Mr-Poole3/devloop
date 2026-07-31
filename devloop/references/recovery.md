@@ -252,7 +252,7 @@ When DevLoop cannot continue and must hand off:
 ### Confirmed checkpoints
 - [x] requirement_understanding
 - [x] plan_and_spec
-- [ ] start_coding (L3 only)
+- [ ] start_coding (L3/hotfix)
 - [ ] final_archive
 
 ### Blockers

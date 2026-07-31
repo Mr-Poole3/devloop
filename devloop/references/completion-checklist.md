@@ -171,9 +171,20 @@ Once all three layers pass:
    - Update last_scanned date
 6. Update devloop/context/architecture-map.md if structure changed
 7. Update devloop/context/CONTEXT.md if new domain terms emerged
-8. Clear .state.yaml (set stage: done)
+8. Clear the active change's state file (set stage: done)
 9. Output delivery report to user
 ```
+
+### Hotfix Archive Gate
+
+If `hotfix: true` on the change's state file, BEFORE step 2:
+
+- [ ] Retroactive OpenSpec change created (or minimal spec at `devloop/openspec/specs/<module>/hotfix-<date>.md` for trivial fixes)
+- [ ] Retroactive spec describes: symptom, root cause, fix applied, regression test added
+- [ ] Retroactive spec reviewed at `final_archive` confirmation point
+- [ ] If retroactive spec is missing or rejected → BLOCK archive, escalate to user
+
+The retroactive spec exists so the next non-hotfix change's `exploring` stage sees the corrected behavior, not the pre-fix behavior.
 
 ## Delivery Summary Template
 
@@ -182,6 +193,8 @@ Once all three layers pass:
 
 **Date:** <YYYY-MM-DD>
 **Risk level:** <L0/L1/L2/L3>
+**Hotfix:** <yes/no> — <if yes: retroactive spec path>
+**Fast track:** <yes/no> — <if forfeited, why>
 **Duration:** <sessions or stages>
 
 ## What was built
