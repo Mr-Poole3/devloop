@@ -116,10 +116,6 @@ npx skills@latest add Mr-Poole3/devloop/devloop-setup
 npx skills@latest add Mr-Poole3/devloop/devloop
 ```
 
-**オプション B — 手動インストール**
-
-`devloop/` と `devloop-setup/` skill ディレクトリをエージェントの skill ロードパスにコピーしてください。
-
 ### 2. プロジェクトでセットアップを実行
 
 ```text

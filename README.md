@@ -116,10 +116,6 @@ npx skills@latest add Mr-Poole3/devloop/devloop-setup
 npx skills@latest add Mr-Poole3/devloop/devloop
 ```
 
-**Option B — Manual install**
-
-Copy the `devloop/` and `devloop-setup/` skill directories into your agent's skill loading path.
-
 ### 2. Run setup in your project
 
 ```text
