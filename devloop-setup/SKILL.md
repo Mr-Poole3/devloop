@@ -46,9 +46,11 @@ Read the following to determine what already exists:
 - `devloop/config.yaml` — DevLoop config
 - `devloop/openspec/config.yaml` — OpenSpec config
 - `devloop/context/` — architecture map, module index, tech stack
+- `devloop/.state/` — per-change state files (multi-change parallel support)
+- `devloop/.state.yaml` — legacy single-file state (pre-schema_version, requires migration)
 - `openspec/` at project root — legacy OpenSpec installation
 - `CONTEXT.md` at project root — legacy context file
-- `.gitignore` — check if `devloop/.state.yaml` is ignored
+- `.gitignore` — check if `devloop/.state/` is ignored
 
 Report findings before taking action.
 
@@ -79,6 +81,8 @@ devloop/
 ├── research/
 ├── tickets/
 ├── reports/
+├── .state/                  # per-change state files (multi-change parallel support)
+│   └── (gitignored)
 └── openspec/
     ├── config.yaml
     ├── specs/
@@ -112,8 +116,11 @@ If OpenSpec CLI is installed, run `openspec init` inside `devloop/openspec/` or 
 Add the following to `.gitignore` if not present:
 
 ```text
+devloop/.state/
 devloop/.state.yaml
 ```
+
+The first line covers the new per-change state directory. The second line covers legacy single-file state; once migration to `.state/` is complete, the legacy entry can be removed.
 
 ### 7. Initialize OpenSpec
 

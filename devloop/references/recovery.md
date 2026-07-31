@@ -101,7 +101,8 @@ Return to implementing
 ### Consecutive Failure Limit
 
 ```text
-Track consecutive_failures in .state.yaml
+Track consecutive_failures in the active change's state file devloop/.state/<change-id>.yaml.
+Also record each failure in metrics.failure_counts.
 
 Any failure (test, typecheck, lint, verify) increments the counter.
 Any success resets it to 0.
@@ -129,13 +130,16 @@ Ask user to intervene or provide guidance
 ```text
 User stops the conversation or says "stop" / "wait"
   ↓
-Save current state to .state.yaml:
-  - current_change
+Save current state to the active change's file devloop/.state/<change-id>.yaml:
+  - change_id
   - stage
   - risk_level
+  - fast_track, hotfix
   - confirmed checkpoints
   - current task
   - consecutive_failures
+  - metrics (updated with stage duration so far)
+  - last_updated
   ↓
 Output handoff summary:
   - Current change: <id>
@@ -145,6 +149,7 @@ Output handoff summary:
   - Known issues: <list>
   - Next step: <what to do when resuming>
   - User confirmations needed: <list>
+  - Other in-progress changes in .state/ (if any): <list>
 ```
 
 ### Session Resume
@@ -152,20 +157,22 @@ Output handoff summary:
 ```text
 /devloop is invoked
   ↓
-Read .state.yaml
+Scan devloop/.state/*.yaml for in-progress changes (stage != done)
   ↓
-Exists and stage != done?
-  ├─ YES → Report:
-  │         "You have an in-progress change: <id>
-  │          Stage: <stage>
-  │          Tasks: <completed>/<total>
-  │          Current: <current task>
-  │
-  │          Continue / Start fresh / Abandon?"
-  │
-  ├─ Continue → Resume from saved stage
-  ├─ Start fresh → Archive current (if any artifacts), create new
-  └─ Abandon → Clear .state.yaml, optionally archive incomplete change
+Also check for legacy devloop/.state.yaml → run v0→v1 migration first
+  ↓
+Any in-progress changes?
+  ├─ NONE → Start a new change normally
+  └─ YES → List all, report each:
+            "  - <change-id>: stage=<stage>, tasks=<completed>/<total>,
+               current=<task>, risk=<L0-L3>, hotfix=<bool>"
+            Ask: continue which / start new parallel / abandon which
+     ↓
+     ├─ Continue <id> → Load that state file, resume from saved stage
+     ├─ Start new parallel → Check module overlap with in-progress changes;
+     │                      warn if overlap; create new .state/<new-id>.yaml
+     └─ Abandon <id> → Clear that .state/<id>.yaml (optionally archive
+                       incomplete change first)
 ```
 
 ## Mid-Flight Requirement Change

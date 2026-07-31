@@ -7,7 +7,8 @@ File-by-file checklist for init, check, and repair modes.
 ```
 devloop/                          # Root for all DevLoop artifacts
 ├── config.yaml                   # DevLoop total control config
-├── .state.yaml                   # Runtime state (gitignored, not created by setup)
+├── .state/                       # Per-change state files (gitignored, multi-change parallel)
+│   └── <change-id>.yaml          # One file per in-progress change (schema_version: 1)
 ├── context/                      # Project context and architecture map
 │   ├── architecture-map.md       # Module list, entry points, dependencies
 │   ├── tech-stack.md             # Tech stack, toolchain, test commands
@@ -42,10 +43,12 @@ devloop/                          # Root for all DevLoop artifacts
 14. [ ] Create `devloop/openspec/specs/` directory
 15. [ ] Create `devloop/openspec/changes/` directory
 16. [ ] Create `devloop/openspec/changes/archive/` directory
-17. [ ] Run `openspec init` inside `devloop/openspec/` if CLI is available
-18. [ ] Merge OpenSpec generated config with DevLoop rules
-19. [ ] Add `devloop/.state.yaml` to `.gitignore`
-20. [ ] Output setup report with warnings
+17. [ ] Create `devloop/.state/` directory (empty, with `.gitkeep`)
+18. [ ] Run `openspec init` inside `devloop/openspec/` if CLI is available
+19. [ ] Merge OpenSpec generated config with DevLoop rules
+20. [ ] Add `devloop/.state/` and legacy `devloop/.state.yaml` to `.gitignore`
+21. [ ] If a legacy `devloop/.state.yaml` exists, leave it for DevLoop's v0→v1 migration (do not delete here)
+22. [ ] Output setup report with warnings
 
 ## Check Mode Checklist
 
@@ -59,21 +62,25 @@ devloop/                          # Root for all DevLoop artifacts
 8. [ ] Verify `devloop/openspec/changes/` directory exists
 9. [ ] Verify `devloop/openspec/changes/archive/` directory exists
 10. [ ] Check if OpenSpec CLI is installed and accessible
-11. [ ] Check if `.gitignore` contains `devloop/.state.yaml`
-12. [ ] Check if test/lint/typecheck commands in config still work
-13. [ ] Report status: ready / needs repair / needs init
+11. [ ] Check if `.gitignore` contains `devloop/.state/` (and legacy `devloop/.state.yaml`)
+12. [ ] Verify `devloop/.state/` directory exists
+13. [ ] Scan `devloop/.state/*.yaml`: report any in-progress changes (stage != done) and any state files with `schema_version` higher than supported
+14. [ ] Check if test/lint/typecheck commands in config still work
+15. [ ] Report status: ready / needs repair / needs init
 
 ## Repair Mode Checklist
 
 1. [ ] Run Check Mode first
 2. [ ] For each missing file or directory: create from template
 3. [ ] For each invalid YAML: attempt to fix or flag for manual attention
-4. [ ] For missing `.gitignore` entry: add it
-5. [ ] For stale tech-stack.md: re-detect and update (confirm first)
-6. [ ] For stale module-index.yaml: re-scan and update (confirm first)
-7. [ ] For missing OpenSpec CLI: remind user to install
-8. [ ] Never overwrite files that have user-written content
-9. [ ] Report what was repaired and what needs manual attention
+4. [ ] For missing `.gitignore` entry: add `devloop/.state/` (and legacy `devloop/.state.yaml`)
+5. [ ] For missing `devloop/.state/` directory: create it with `.gitkeep`
+6. [ ] For legacy `devloop/.state.yaml` still present: leave it; DevLoop intake will migrate it (do not migrate during setup)
+7. [ ] For stale tech-stack.md: re-detect and update (confirm first)
+8. [ ] For stale module-index.yaml: re-scan and update (confirm first)
+9. [ ] For missing OpenSpec CLI: remind user to install
+10. [ ] Never overwrite files that have user-written content
+11. [ ] Report what was repaired and what needs manual attention
 
 ## Reconfigure Mode Checklist
 

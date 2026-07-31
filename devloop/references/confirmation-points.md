@@ -13,12 +13,15 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 
 ## Confirmation Points by Risk Level
 
-| Point | L0 | L1 | L2 | L3 |
-|------|----|----|----|-----|
-| Requirement understanding | — | — | ✓ | ✓ |
-| Plan and spec | — | — | ✓ | ✓ |
-| Start coding | — | — | — | ✓ |
-| Final archive | — | ✓ (review result) | ✓ | ✓ |
+| Point | L0 | L1 | L2 | L2 fast track | L3 | Hotfix |
+|------|----|----|----|----|-----|--------|
+| Requirement understanding | — | — | ✓ | merged | ✓ | — |
+| Plan and spec | — | — | ✓ | merged | ✓ | — |
+| Combined plan | — | — | — | ✓ | — | — |
+| Start coding | — | — | — | — | ✓ | ✓ (brief) |
+| Final archive | — | ✓ (review result) | ✓ | ✓ | ✓ | ✓ (with retroactive spec) |
+
+"L2 fast track" merges `requirement_understanding` + `plan_and_spec` into a single `combined_plan` checkpoint when single-module + no-data-model + non-breaking-API criteria are met (see [routing.md](routing.md#l2-fast-track)).
 
 ## Point 1: Requirement Understanding
 
@@ -75,6 +78,36 @@ DevLoop is highly automated, but pauses at key points to prevent catastrophic mi
 **If rejected:** Update OpenSpec artifacts (`/opsx:update`). Re-present.
 
 **If approved:** Record in `.state.yaml`: `confirmed: [requirement_understanding, plan_and_spec]`.
+
+## Point 2.5: Combined Plan (L2 Fast Track Only)
+
+**Stage:** End of `reviewing_plan`, when `fast_track: true` is set on the change.
+
+**Present (in one combined block):**
+
+```markdown
+## Combined Plan (L2 Fast Track)
+
+### Requirement summary
+**Goal:** <what we're building and why>
+**In scope:** <what's included>
+**Out of scope:** <what's explicitly excluded>
+**Success criteria:** <how we know it's done>
+**Fast track rationale:** single module (<name>), no data model change, non-breaking API
+
+### Plan summary
+**Change ID:** <openspec change id>
+**Specs:** <list of requirements and scenario count>
+**Tasks:** <count> tasks in <count> groups
+**Testing strategy:** <seam description, test types>
+**Risks:** <identified risks>
+```
+
+**Ask:** "Does the requirement AND the plan look right? Should I start implementing? (Saying no returns to grilling to refine the requirement, then re-plans.)"
+
+**If rejected:** Fall back to standard L2. Split into separate `requirement_understanding` and `plan_and_spec` checkpoints. Return to grilling to resolve the rejected part. Set `fast_track: false` in the state file only if the rejection reveals a fast-track criterion no longer holds (second module touched, data model change, breaking API). Otherwise keep `fast_track: true` and re-present `combined_plan` after refining.
+
+**If approved:** Record in the change's state file: `confirmed: [combined_plan]`. The `combined_plan` confirmation satisfies both `requirement_understanding` and `plan_and_spec` for downstream stages.
 
 ## Point 3: Start Coding (L3 Only)
 

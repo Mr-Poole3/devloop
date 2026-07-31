@@ -13,24 +13,24 @@ Full state machine for the DevLoop workflow.
                    │ triaging  │
                    └────┬──────┘
                         │
-              ┌─────────┼─────────┐
-              │         │         │
-              ▼         ▼         ▼
-             L0        L1      L2/L3
-              │         │         │
-              ▼         ▼         ▼
-           done    diagnose   exploring
-                      │           │
-                      ▼           ▼
-                     tdd       grilling
-                      │           │
-                      ▼           ▼
-                  code-review  specifying
-                      │           │
-                      ▼           ▼
-                    done    reviewing_plan
-                                  │
-                                  ▼
+         ┌─────────┬────┴────────┬──────────┐
+         │         │             │          │
+         ▼         ▼             ▼          ▼
+        L0        L1          L2/L3      hotfix
+         │         │             │          │
+         ▼         ▼             ▼          ▼
+       done    diagnose      exploring  implementing
+                  │              │        (skip grill/spec)
+                  ▼              ▼             │
+                 tdd         grilling          ▼
+                  │              │          verifying
+                  ▼              ▼             │
+              code-review   specifying         ▼
+                  │              │          archiving
+                  ▼              ▼        (retroactive spec REQUIRED)
+                done      reviewing_plan       │
+                                  │            ▼
+                                  ▼          done
                             implementing ◄──────┐
                                   │              │
                                   │ spec drift?  │
@@ -48,20 +48,24 @@ Full state machine for the DevLoop workflow.
 
 ## Stage Details
 
+**Metrics tracking (applies to every stage):** On entering and exiting each stage, record `metrics.stage_durations[<stage>]`. On any failure, increment `metrics.failure_counts[<type>]`. On confirmation rejection, increment `metrics.confirmation_rejections`. On spec drift detection, increment `metrics.spec_drifts`. These feed workflow self-optimization (e.g., stages with recurring failures get extra grilling attention).
+
 ### 1. intake
 
 **Entry:** User provides a requirement via `/develop <requirement>` or natural language.
 
 **Actions:**
-1. Read `devloop/.state.yaml` if it exists.
-2. If a previous change is in progress, report status and ask: continue / abandon / start new.
-3. Read `devloop/config.yaml` for project settings.
-4. Read `devloop/context/CONTEXT.md` for domain language.
-5. Read `devloop/context/architecture-map.md` for module overview.
+1. Scan `devloop/.state/*.yaml` for in-progress changes.
+2. If a legacy `devloop/.state.yaml` (no `schema_version`) exists, run the v0→v1 migration. See [state-migration.md](state-migration.md).
+3. If one or more in-progress changes exist, list them and ask: continue an existing change / start a new parallel change / abandon one.
+   - Parallel changes are allowed as long as their affected modules do not overlap (check `module-index.yaml`). If overlap is detected, warn and ask the user to pick one.
+4. Read `devloop/config.yaml` for project settings.
+5. Read `devloop/context/CONTEXT.md` for domain language.
+6. Read `devloop/context/architecture-map.md` for module overview.
 
-**Exit:** Project context loaded. Ready to classify.
+**Exit:** Project context loaded. Active change selected (existing or new). Ready to classify.
 
-**State file:** Create or update `.state.yaml` with `stage: triaging`.
+**State file:** Create `devloop/.state/<change-id>.yaml` (for new changes) or update the selected existing file. Set `stage: triaging`, `schema_version: 1`, `created_at` and `last_updated`. Initialize `metrics` to zeros.
 
 ---
 
@@ -84,7 +88,7 @@ Full state machine for the DevLoop workflow.
 3. Assign risk level: L0, L1, L2, or L3.
 4. Report classification to user with rationale.
 
-**Exit:** Risk level assigned. `stage` updated in `.state.yaml`.
+**Exit:** Risk level assigned. `stage` updated in the active change's state file.
 
 **L0 shortcut:** Handle directly, set `stage: done`, no further lifecycle stages.
 **L1 shortcut:** Skip to implementing-equivalent flow (diagnose → tdd → review).
@@ -169,11 +173,20 @@ Full state machine for the DevLoop workflow.
 **Actions:**
 1. Generate requirement summary from grilling results. See [confirmation-points.md](confirmation-points.md).
 2. Generate plan summary from OpenSpec artifacts.
-3. Present both to user.
-4. **[CONFIRMATION POINT 1: requirement_understanding]**
-5. **[CONFIRMATION POINT 2: plan_and_spec]**
+3. Evaluate fast-track eligibility (L2 only):
+   - Single module? (check `module-index.yaml`)
+   - No data model change? (check OpenSpec design.md)
+   - Non-breaking API only? (check OpenSpec specs/)
+   - If ALL true → set `fast_track: true` in the change's state file.
+4. Present:
+   - **Standard L2/L3**: requirement summary and plan summary separately.
+     - **[CONFIRMATION POINT 1: requirement_understanding]**
+     - **[CONFIRMATION POINT 2: plan_and_spec]**
+   - **L2 fast track** (`fast_track: true`): combined summary in one block.
+     - **[CONFIRMATION POINT 2.5: combined_plan]** — satisfies both 1 and 2.
+   - **Hotfix**: skip this stage entirely (no plan to review). Go straight to implementing. Set `confirmed: [combined_plan]` nominally to satisfy downstream gates; the real gate is the retroactive spec at archiving.
 
-**Exit:** User confirms plan. `confirmed` array updated in `.state.yaml`.
+**Exit:** User confirms plan (or combined plan). `confirmed` array updated in the active change's state file.
 
 **State file:** Update `stage: implementing`.
 
@@ -186,22 +199,23 @@ Full state machine for the DevLoop workflow.
 **Actions:**
 1. **[L3 ONLY — CONFIRMATION POINT: start_coding]**
 2. Read `tasks.md` from current OpenSpec change.
-3. For each task, follow the TDD loop:
+3. **Run critical-domain detection** over the planned changed files and OpenSpec artifacts. See [completion-checklist.md](completion-checklist.md#critical-domain-detection-heuristics). Record detected domains in the change's state file. Each detected domain requires dedicated tests before its tasks can be marked complete.
+4. For each task, follow the TDD loop:
    a. **Red**: Write a failing test that covers the expected behavior.
       - Test file location: follow project convention (`tests/` or `src/__tests__/`).
       - Test file naming: `*.test.ts` (or language-appropriate suffix).
       - Test only external observable behavior, not internal implementation.
-      - If the task touches security, data, payment, or privacy domains, write dedicated tests.
+      - If the task touches a detected critical domain (security, data, payment, privacy), write dedicated tests for that domain.
    b. **Green**: Implement the minimum code to make the test pass.
    c. **Refactor**: Clean up code while keeping tests green.
    d. After completing each task, check it off in `tasks.md`.
-   e. Update `.state.yaml` with current task.
-4. **Spec-first principle:** If implementation reveals a spec gap:
+   e. Update the active change's state file with current task and `metrics.stage_durations`/`failure_counts` as events occur.
+5. **Spec-first principle:** If implementation reveals a spec gap:
    - Pause coding.
    - Update OpenSpec (`/opsx:update` or manual edit of specs/design/tasks).
    - Resume coding.
-5. If test fails, enter `diagnosing-bugs` flow — do not blindly retry.
-6. Track consecutive failures. If 3 in a row, pause and report.
+6. If test fails, enter `diagnosing-bugs` flow — do not blindly retry.
+7. Track consecutive failures. If 3 in a row, pause and report.
 
 **Exit:** All tasks in `tasks.md` completed.
 
@@ -232,8 +246,7 @@ Full state machine for the DevLoop workflow.
    - Check critical domains (security, data, payment, privacy): dedicated tests exist.
 5. **Execute `/opsx:verify`** — checks completeness, correctness, coherence.
 6. **Execute `code-review` skill** — checks standards and spec compliance.
-   - If host supports sub-agents: run both axes in parallel.
-   - If not: run serially.
+   - Detect host capability (sub-agent / background tasks): if supported, run axes in parallel; otherwise run serially.
 
 **Failure handling:**
 - Test failure → `diagnosing-bugs` → fix → re-run tests.
@@ -261,7 +274,7 @@ Full state machine for the DevLoop workflow.
    - If module interfaces changed, update `key_interfaces`.
    - Update `last_scanned` date.
 6. Update `devloop/context/architecture-map.md` if structure changed.
-7. Clear `.state.yaml` or set `stage: done`.
+7. Clear the active change's state file (set `stage: done`). Keep the file for one session to allow post-archive review, then delete on next intake (or move to `devloop/.state/_archive/` if configured).
 
 **Exit:** Change archived. Specs synced. Context updated.
 

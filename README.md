@@ -337,16 +337,29 @@ Delivery Layer 📦 Tasks + Code review + Delivery summary
 
 DevLoop is designed to work across AI coding agents without depending on host-specific features.
 
-| Host | Status | Notes |
-|------|--------|-------|
-| Claude Code | ✅ Full support | Sub-agent parallel code review |
-| Codex | ✅ Full support | Serial code review |
-| OpenCode | ✅ Full support | Serial code review |
-| TRAE | ✅ Full support | Serial code review |
-| Cursor | ✅ Full support | Serial code review |
+**Design rule:** No workflow logic is gated on a single host brand. Differences are handled by runtime capability detection, not host-name checks.
 
-**Degradation rules:**
+| Capability | What It Enables | Fallback When Missing |
+|------------|------------------|-----------------------|
+| Sub-agent / parallel workers | Parallel code-review axes, parallel verification | Serial execution of same steps |
+| Background tasks | Non-blocking verify + review pipeline | Synchronous pipeline with explicit stage gates |
+| Auto skill/command trigger | `/develop` invoked automatically on intake | User invokes `/develop` manually |
+| Workspace filesystem coordination | Shared state across agents in same repo | Lock + single-writer state updates |
+
+**Supported hosts (capability-aware):**
+
+| Host | Status | Capability Notes |
+|------|--------|------------------|
+| Claude Code | ✅ Full | Sub-agents, background tasks |
+| Codex | ✅ Full | Capability detection required |
+| OpenCode | ✅ Full | Capability detection required |
+| TRAE | ✅ Full | Capability detection required |
+| Cursor | ✅ Full | Capability detection required |
+| Others | 🟡 Partial | Works with manual orchestration |
+
+**Degradation rules (host-agnostic):**
 - No sub-agent support → `code-review` runs serially instead of parallel
+- No background task support → no async pipeline stages
 - No auto skill trigger → User manually invokes `/develop`
 - No OpenSpec CLI → L0/L1 only; L2/L3 paused with install instructions
 

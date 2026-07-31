@@ -32,14 +32,24 @@ routing:
   L2:
     workflow: grill-openspec-apply-verify-archive
     confirmations: [requirement_understanding, plan_and_spec, final_archive]
+    # Fast track: when ALL true, merge requirement_understanding + plan_and_spec
+    # into a single combined_plan confirmation point.
+    fast_track:
+      enabled: true
+      criteria:
+        - single_module_only          # changes confined to one module
+        - no_data_model_change        # no schema/migration/entity changes
+        - non_breaking_api_only       # see routing.md disambiguation
+      merged_confirmation: combined_plan
   L3:
     workflow: grill-with-docs-explore-spec-tickets-openspec-apply-verify-review-archive
     confirmations: [requirement_understanding, plan_and_spec, start_coding, final_archive]
 
 # Escalation factors — ANY of these forces at least L2, potentially L3
+# Note: only BREAKING API changes escalate. Non-breaking API changes stay L2.
 escalation_factors:
   - data_model_changes
-  - public_api_changes
+  - breaking_public_api_changes    # renamed: was public_api_changes (ambiguous)
   - permission_payment_privacy_user_data
   - data_migration
   - cross_service_or_module
@@ -47,6 +57,17 @@ escalation_factors:
   - rollback_requirements
   - high_technical_uncertainty
   - multi_person_or_multi_agent
+
+# Hotfix bypass — for urgent production fixes
+hotfix:
+  enabled: true
+  # Skip grilling + specifying; go straight to implementing with TDD.
+  # A retroactive OpenSpec change MUST be created before archiving.
+  triggers:
+    - user_explicit_hotfix_flag     # user invokes /develop --hotfix
+    - urgency_keywords_in_request   # "production down", "P0", "critical bug"
+  retroactive_spec_required: true
+  block_archive_if_spec_missing: true
 
 # Issue tracker configuration
 tracker:
@@ -80,8 +101,16 @@ brownfield:
   # L2: specs auto-updated on archive
 
 # Host compatibility
-host:
-  # DevLoop works across multiple AI coding agents
-  # Sub-agent support enables parallel code review
-  supports_subagents: true
-  fallback_serial_review: true
+# Do not branch on host names. Use capability flags for runtime behavior.
+host_capability:
+  # Detect at runtime from host environment
+  subagents: true
+  background_tasks: true
+  auto_skill_trigger: true
+  workspace_fs_coordination: true
+
+  fallback:
+    # When capability is false, degrade deterministically
+    serial_review: true
+    sync_pipeline: true
+    manual_trigger: true

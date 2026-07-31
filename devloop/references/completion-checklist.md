@@ -30,6 +30,34 @@ All must pass. No exceptions.
 - [ ] **L3**: All scenarios + critical cross-module integration tests
 - [ ] **Critical domains** (security, data, payment, privacy) have dedicated test coverage
 
+### Critical Domain Detection Heuristics
+
+A change is considered to touch a **critical domain** when ANY of the following match. Detection runs at the start of `implementing` and again at `verifying`. If a critical domain is detected, dedicated tests for that domain are REQUIRED (not optional).
+
+**File path / module name keywords** (case-insensitive substring match):
+- **Security**: `auth`, `login`, `session`, `token`, `password`, `credential`, `permission`, `rbac`, `acl`, `jwt`, `oauth`, `saml`, `secret`, `crypto`
+- **Payment**: `payment`, `billing`, `charge`, `invoice`, `checkout`, `order`, `subscription`, `refund`, `stripe`, `paypal`, `alipay`, `wechatpay`
+- **Data/Persistence**: `migration`, `schema`, `model`, `entity`, `repository`, `dao`, `serializer`, `deserializer`
+- **Privacy/PII**: `user`, `profile`, `account`, `email`, `phone`, `address`, `pii`, `gdpr`, `ccpa`, `personal`
+
+**Code content signals** (scan staged/changed files for these tokens):
+- `password`, `apiKey`, `api_key`, `accessToken`, `refreshToken`, `sessionStorage`, `localStorage` (security)
+- `processPayment`, `chargeAmount`, `refundAmount`, currency codes (`USD`, `CNY`, `EUR`) near numeric literals (payment)
+- `DROP TABLE`, `ALTER TABLE`, `ADD COLUMN`, migration version bumps (data migration)
+- `PII`, `personalData`, `userEmail`, `userPhone`, `ssn`, `nationalId` (privacy)
+- PII field names in serializer/model definitions
+
+**OpenSpec artifact signals** (scan `proposal.md`, `specs/`, `design.md`):
+- Keywords: `auth`, `permission`, `payment`, `migration`, `PII`, `GDPR`, `rollback`, `backward compatible`
+- Scenarios mentioning: login, checkout, refund, delete account, export data, role change
+
+**Reporting:** When a critical domain is detected, the implementing stage MUST:
+1. List the detected domain(s) and the triggering signal (file/keyword/artifact).
+2. State which dedicated tests cover each detected domain.
+3. If a detected domain has no dedicated test, BLOCK progress (treat as a code-layer failure).
+
+**False-positive handling:** If a keyword matches but the change does not actually affect that domain (e.g., a `user` table column rename that is purely cosmetic), the agent may flag it as a false positive in the delivery summary. The flag MUST include the reason and be reviewed at `final_archive`.
+
 ### Test Quality Rules
 
 - [ ] Tests verify external observable behavior, not internal implementation details
