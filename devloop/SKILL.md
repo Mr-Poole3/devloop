@@ -36,7 +36,7 @@ intake → triaging → exploring → grilling → specifying
 
 ### Stage Summary
 
-1. **intake** — Scan `devloop/.state/*.yaml` for in-progress changes. If any exist, list them and ask: continue one / start new. Read `devloop/config.yaml` and `devloop/context/` for project context.
+1. **intake** — Scan `devloop/.state/*.yaml` for in-progress changes. If any exist, list them and ask: continue one / start new. If a file has `workflow: project-creation` and `stage != done`, it belongs to `develop-new` — do not resume it here; tell the user to run `/develop-new <requirement>` instead. Read `devloop/config.yaml` and `devloop/context/` for project context.
 2. **triaging** — Classify risk level (L0-L3). See [routing.md](references/routing.md).
 3. **exploring** — Read architecture map. Check `module-index.yaml` for `has_spec`. If false, build module spec (L1 on-demand modeling). Deep-dive into affected modules.
 4. **grilling** — L2: use `grilling` skill. L3: use `grill-with-docs` skill. Clarify until all decision branches resolved. Update `CONTEXT.md` and ADRs if L3.

@@ -52,7 +52,7 @@ DevLoop:
 
 ---
 
-## 🛠️ 两个 Skill
+## 🛠️ 三个 Skill
 
 ### `devloop-setup` — 初始化
 
@@ -72,6 +72,22 @@ DevLoop:
 - ⚙️ 初始化 OpenSpec 配置
 - 📝 使用检测值生成配置文件
 - 🔁 幂等——可安全重复运行
+
+### `develop-new` — 创建
+
+从零创建全新项目，并接入 DevLoop 工作流。
+
+```text
+/develop-new 我想建一个博客平台
+/develop-new 做一个内部工时统计 CLI 工具
+```
+
+**功能：**
+- 🔍 追问用户，澄清项目（目标、范围、技术栈、风险领域）
+- 📝 产出经确认的蓝图（技术选型 + 理由、模块划分）
+- 🏗️ 使用所选技术栈的官方脚手架（create-vite、cargo new、go mod init 等），无官方 CLI 时用最小模板兜底
+- 🔌 接线完整 `devloop/` 结构——创建即通过 `/devloop-setup check`
+- 🧭 功能实现移交给 `/develop <功能>`
 
 ### `devloop` — 开发
 
@@ -107,16 +123,27 @@ DevLoop:
 npx skills@latest add Mr-Poole3/devloop
 ```
 
-CLI 会自动检测 `devloop-setup` 和 `devloop` 两个 skill，让你选择安装到哪些 Agent（Claude Code、Codex、OpenCode、TRAE、Cursor 等 50+ 宿主）。
+CLI 会自动检测 `devloop-setup`、`develop-new`、`devloop` 三个 skill，让你选择安装到哪些 Agent（Claude Code、Codex、OpenCode、TRAE、Cursor 等 50+ 宿主）。
 
 也可以单独安装某个 skill：
 
 ```bash
 npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/develop-new
 npx skills@latest add Mr-Poole3/devloop/devloop
 ```
 
-### 2. 在项目中运行初始化
+### 2. 从零创建项目（或接入既有项目）
+
+**全新项目：**
+
+```text
+/develop-new <你的项目想法>
+```
+
+追问澄清需求 → 脚手架（官方 CLI 或最小模板）→ 接线 `devloop/` 结构，创建完成后立即可用 `/develop`。
+
+**既有项目：**
 
 ```text
 /devloop-setup init
@@ -406,6 +433,25 @@ devloop/
     ├── requirement-summary.md            # 确认点 1 模板
     ├── plan-summary.md                   # 确认点 2 模板
     └── delivery-summary.md               # 确认点 4 模板
+
+develop-new/
+├── SKILL.md                              # 主指令（6 阶段项目创建状态机）
+├── references/
+│   ├── scaffold-lifecycle.md             # 6 阶段状态机 + 节点管理 + 中断恢复
+│   ├── grilling-checklist.md             # 新项目追问覆盖清单
+│   ├── stack-recipes.md                  # 官方脚手架 CLI 命令表 + 兜底规则
+│   ├── blueprint-spec.md                 # blueprint.md 结构与规则
+│   └── wiring.md                         # devloop/ 接线清单 + 验收验证
+└── templates/
+    └── minimal-ts/                       # 无官方 CLI 时的兜底脚手架
+        ├── package.json
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── .gitignore
+        ├── README.md
+        └── src/
+            ├── index.ts
+            └── index.test.ts
 ```
 
 ---

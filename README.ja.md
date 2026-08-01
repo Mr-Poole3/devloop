@@ -52,7 +52,7 @@ DevLoop:
 
 ---
 
-## 🛠️ 二つの Skill
+## 🛠️ 三つの Skill
 
 ### `devloop-setup` — 初期化
 
@@ -72,6 +72,22 @@ DevLoop:
 - ⚙️ OpenSpec 設定を初期化
 - 📝 検出値で設定ファイルを生成
 - 🔁 冪等——複数回実行可能
+
+### `develop-new` — 作成
+
+ゼロから新しいプロジェクトを作成し、DevLoop に接続します。
+
+```text
+/develop-new ブログプラットフォームを構築したい
+/develop-new 社内用タイムトラッキング CLI を作る
+```
+
+**機能：**
+- 🔍 プロジェクトを明確化するヒアリング（目標、スコープ、技術スタック、リスク領域）
+- 📝 承認済みブループリントを出力（技術選定 + 理由、モジュール分割）
+- 🏗️ 選択したスタックの公式スキャフォールド CLI で雛形を作成（create-vite、cargo new、go mod init など）。公式 CLI がない場合は最小テンプレートでフォールバック
+- 🔌 完全な `devloop/` 構造を配線——作成時点で `/devloop-setup check` をパス
+- 🧭 機能実装は `/develop <機能>` に引き継ぎ
 
 ### `devloop` — 開発
 
@@ -107,16 +123,27 @@ DevLoop:
 npx skills@latest add Mr-Poole3/devloop
 ```
 
-CLI が `devloop-setup` と `devloop` の両方の skill を自動検出し、どのエージェントにインストールするか選択できます（Claude Code、Codex、OpenCode、TRAE、Cursor など 50+ 対応）。
+CLI が `devloop-setup`、`develop-new`、`devloop` の三つの skill を自動検出し、どのエージェントにインストールするか選択できます（Claude Code、Codex、OpenCode、TRAE、Cursor など 50+ 対応）。
 
 個別の skill をインストールすることも可能：
 
 ```bash
 npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/develop-new
 npx skills@latest add Mr-Poole3/devloop/devloop
 ```
 
-### 2. プロジェクトでセットアップを実行
+### 2. 新規プロジェクトを作成（または既存プロジェクトを接続）
+
+**新規プロジェクト：**
+
+```text
+/develop-new <プロジェクトのアイデア>
+```
+
+要件をヒアリング → スキャフォールド（公式 CLI または最小テンプレート）→ `devloop/` 構造を配線。作成完了後すぐに `/develop` が使えます。
+
+**既存プロジェクト：**
 
 ```text
 /devloop-setup init
@@ -406,6 +433,25 @@ devloop/
     ├── requirement-summary.md            # 確認ポイント 1 テンプレート
     ├── plan-summary.md                   # 確認ポイント 2 テンプレート
     └── delivery-summary.md               # 確認ポイント 4 テンプレート
+
+develop-new/
+├── SKILL.md                              # メイン指示（6 段階プロジェクト作成マシン）
+├── references/
+│   ├── scaffold-lifecycle.md             # 6 段階状態マシン + ノード管理 + 中断復旧
+│   ├── grilling-checklist.md             # 新規プロジェクトのヒアリング範囲
+│   ├── stack-recipes.md                  # 公式スキャフォールド CLI コマンド + フォールバック規則
+│   ├── blueprint-spec.md                 # blueprint.md の構造と規則
+│   └── wiring.md                         # devloop/ 生成チェックリスト + 検証
+└── templates/
+    └── minimal-ts/                       # 公式 CLI がない場合のフォールバック雛形
+        ├── package.json
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── .gitignore
+        ├── README.md
+        └── src/
+            ├── index.ts
+            └── index.test.ts
 ```
 
 ---

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+
+# DevLoop runtime state — local only, never shared across machines
+devloop/.state/
+devloop/.state.yaml
+
+# Editor / OS
+.DS_Store
+*.log

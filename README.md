@@ -52,7 +52,7 @@ DevLoop:
 
 ---
 
-## 🛠️ Two Skills
+## 🛠️ Three Skills
 
 ### `devloop-setup` — Initialize
 
@@ -72,6 +72,22 @@ Set up, check, and repair the DevLoop workflow in any repository.
 - ⚙️ Initializes OpenSpec configuration
 - 📝 Generates config files with detected values
 - 🔁 Idempotent — safe to run multiple times
+
+### `develop-new` — Create
+
+Create a brand-new project from scratch and wire it into DevLoop.
+
+```text
+/develop-new I want to build a blog platform
+/develop-new Build an internal time-tracking CLI
+```
+
+**What it does:**
+- 🔍 Grills the user to clarify the project (goal, scope, tech stack, risk domains)
+- 📝 Produces a confirmed blueprint (tech selection + rationale, module division)
+- 🏗️ Scaffolds via the official CLI for the chosen stack (create-vite, cargo new, go mod init, …) or a minimal template fallback
+- 🔌 Wires the full `devloop/` structure — it passes `/devloop-setup check` on creation
+- 🧭 Hands feature work off to `/develop <feature>`
 
 ### `devloop` — Develop
 
@@ -107,16 +123,27 @@ Drive a requirement through the full development loop.
 npx skills@latest add Mr-Poole3/devloop
 ```
 
-The CLI will detect both `devloop-setup` and `devloop` skills and let you choose which agents to install them on (Claude Code, Codex, OpenCode, TRAE, Cursor, and 50+ more).
+The CLI will detect `devloop-setup`, `develop-new`, and `devloop` skills and let you choose which agents to install them on (Claude Code, Codex, OpenCode, TRAE, Cursor, and 50+ more).
 
 You can also install a specific skill:
 
 ```bash
 npx skills@latest add Mr-Poole3/devloop/devloop-setup
+npx skills@latest add Mr-Poole3/devloop/develop-new
 npx skills@latest add Mr-Poole3/devloop/devloop
 ```
 
-### 2. Run setup in your project
+### 2. Create a project from scratch (or wire an existing one)
+
+**New project:**
+
+```text
+/develop-new <your project idea>
+```
+
+This grills your requirements, scaffolds the skeleton (official CLI or minimal template), and wires the `devloop/` structure — ready for `/develop` immediately.
+
+**Existing project:**
 
 ```text
 /devloop-setup init
@@ -408,6 +435,25 @@ devloop/
     ├── requirement-summary.md            # Confirmation point 1 template
     ├── plan-summary.md                   # Confirmation point 2 template
     └── delivery-summary.md               # Confirmation point 4 template
+
+develop-new/
+├── SKILL.md                              # Main instructions (6-stage project creation)
+├── references/
+│   ├── scaffold-lifecycle.md             # 6-stage state machine + node management + recovery
+│   ├── grilling-checklist.md             # New-project clarification coverage
+│   ├── stack-recipes.md                  # Official scaffold CLI commands + fallback rules
+│   ├── blueprint-spec.md                 # blueprint.md structure and rules
+│   └── wiring.md                         # devloop/ generation checklist + verification
+└── templates/
+    └── minimal-ts/                       # Fallback scaffold when no official CLI exists
+        ├── package.json
+        ├── tsconfig.json
+        ├── vitest.config.ts
+        ├── .gitignore
+        ├── README.md
+        └── src/
+            ├── index.ts
+            └── index.test.ts
 ```
 
 ---

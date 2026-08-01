@@ -58,6 +58,7 @@ Full state machine for the DevLoop workflow.
 1. Scan `devloop/.state/*.yaml` for in-progress changes.
 2. If a legacy `devloop/.state.yaml` (no `schema_version`) exists, run the v0→v1 migration. See [state-migration.md](state-migration.md).
 3. If one or more in-progress changes exist, list them and ask: continue an existing change / start a new parallel change / abandon one.
+   - If an in-progress file has `workflow: project-creation`, it belongs to `develop-new` (project scaffolding), not `devloop`. Do not resume it here; tell the user to run `/develop-new <requirement>` instead.
    - Parallel changes are allowed as long as their affected modules do not overlap (check `module-index.yaml`). If overlap is detected, warn and ask the user to pick one.
 4. Read `devloop/config.yaml` for project settings.
 5. Read `devloop/context/CONTEXT.md` for domain language.
